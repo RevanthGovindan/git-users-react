@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 import './UsersList.css';
 class UsersList extends Component {
-    constructor(props) {
-        super(props);
-    }
     render() {
         return (
             <div>
