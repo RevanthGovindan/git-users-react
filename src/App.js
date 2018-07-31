@@ -7,39 +7,43 @@ class App extends Component {
   constructor() {
     super();
     this.state = { name: '', searchName: '', data: '', clicked: false, page: 1 };
-    this.firstLoad=this.firstLoad.bind(this);
+    this.firstLoad = this.firstLoad.bind(this);
   }
   handleChange(event) {
     const name = event.target.value;
     this.setState({ name: name });
-    this.firstLoad=this.firstLoad.bind(this);
+    this.firstLoad = this.firstLoad.bind(this);
   }
-  firstLoad(name,page) {
-    alert(this.state.page)
-    fetch('https://api.github.com/search/users?q=' + name + '&page=' +page).then(response => {
-      return response.json();
-    }).then(data => {
-      this.setState({ data });
-      console.log(data)
-    }).catch(error => {
-      console.log(error);
-    });
-    this.setState({ searchName: name, name: '', clicked: true });
+  async firstLoad(name, page) {
+    if (name !== '') {
+      const data = await fetch('https://api.github.com/search/users?q=' + name + '&page=' + page).then(response => {
+        return response.json();
+      }).then(data =>
+        data
+      ).catch(error => {
+        console.log(error);
+      });
+      this.setState({ data: data })
+      this.setState({ searchName: name, name: '', clicked: true });
+    }
+    else {
+      alert("Value can't be Empty");
+    }
   }
-  updatePage(pageNum){  
-    this.firstLoad(this.state.searchName,pageNum);
+  updatePage(pageNum) {
+    this.firstLoad(this.state.searchName, pageNum);
   }
   render() {
     return (
       <div className="App">
         <div className="box">
-          <input type="text" value={this.state.name} placeholder="Search" onChange={this.handleChange.bind(this)}/>
-          <button onClick={this.firstLoad.bind(this, this.state.name,1)}>
+          <input type="text" value={this.state.name} placeholder="Search" onChange={this.handleChange.bind(this)} />
+          <button onClick={this.firstLoad.bind(this, this.state.name, 1)}>
             <span className="glyphicon glyphicon-search"></span>
           </button>
-        </div>        
+        </div>
         {this.state.clicked && this.state.data !== '' ? <UsersList list={this.state.data} name={this.state.searchName} /> : ""}
-        <div>{this.state.clicked ? <Pagination totalPages={this.state.data.total_count} action={this.updatePage.bind(this)}/> : ""}</div>
+        <div>{this.state.clicked ? <Pagination totalPages={Math.ceil(this.state.data.total_count / 30)} action={this.updatePage.bind(this)} /> : ""}</div>
       </div>
     );
   }
